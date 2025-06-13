@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- borde naranja oscuro al enfocar o hover -->
+    <item android:color="@color/button_orange_dark" android:state_focused="true"/>
+    <item android:color="@color/button_orange_dark" android:state_hovered="true"/>
+    <!-- borde gris en reposo -->
+    <item android:color="@color/textfield_stroke_default"/>
+</selector>

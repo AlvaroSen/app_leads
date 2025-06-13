@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="button_orange">#FFA500</color>
+    <color name="button_orange_dark">#FF8C00</color>
+    <color name="on_button_orange">#FFFFFF</color>
+    <color name="textfield_stroke_default">#DDDDDD</color>
+    <color name="button_red">#D32F2F</color>
+    <color name="on_button_red">#FFFFFF</color>
+</resources>
