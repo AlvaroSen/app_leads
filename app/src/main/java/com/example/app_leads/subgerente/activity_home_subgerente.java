@@ -13,6 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.app_leads.R;
 import com.example.app_leads.activity_login;
 import com.example.app_leads.admin.activity_lead_admin;
+import com.example.app_leads.ejecutivo.activity_lead_ejecutivo;
 import com.example.app_leads.model.User;
 import com.google.android.material.button.MaterialButton;
 
@@ -46,7 +47,7 @@ public class activity_home_subgerente extends AppCompatActivity {
 
         // Navegar a la pantalla de leads
         btnVerLeads.setOnClickListener(v -> {
-            Intent i = new Intent(this, activity_lead_admin.class);
+            Intent i = new Intent(this, activity_lead_subgerente.class);
             i.putExtra("user", user);
             startActivity(i);
         });

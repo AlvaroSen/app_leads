@@ -1,6 +1,7 @@
 package com.example.app_leads;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,7 +14,6 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_leads.admin.activity_home_admin;
@@ -30,16 +30,13 @@ public class activity_login extends AppCompatActivity {
     private EditText etUsuario;
     private EditText etClave;
     private Button  btnLogin;
-    private RequestQueue queue;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Habilita Edge-to-Edge para dibujar tras la barra de estado
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
 
-        // Aplica los Insets del sistema para ajustar padding
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
                 (v, insets) -> {
@@ -49,23 +46,14 @@ public class activity_login extends AppCompatActivity {
                 }
         );
 
-        // Inicializa la cola de peticiones de Volley
-        queue = Volley.newRequestQueue(this);
-
-        // Referencias a los campos UI
         etUsuario = findViewById(R.id.input_username);
         etClave   = findViewById(R.id.input_password);
         btnLogin  = findViewById(R.id.boton_login);
 
-        // Asigna el listener para cuando el usuario pulse Iniciar Sesión
         btnLogin.setOnClickListener(v -> login());
     }
 
-    /**
-     * Método que se encarga de realizar el login contra el API.
-     */
     private void login() {
-        // 1) Lee y valida los campos de usuario y clave
         String usuario = etUsuario.getText().toString().trim();
         String clave   = etClave.getText().toString().trim();
         if (usuario.isEmpty() || clave.isEmpty()) {
@@ -73,7 +61,6 @@ public class activity_login extends AppCompatActivity {
             return;
         }
 
-        // 2) Construye el JSON con las credenciales
         JSONObject body = new JSONObject();
         try {
             body.put("username", usuario);
@@ -84,14 +71,13 @@ public class activity_login extends AppCompatActivity {
             return;
         }
 
-        // 3) Crea la petición POST a la URL de login
         JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.POST,
                 api_config.LOGIN,
                 body,
                 resp -> {
                     try {
-                        // 4) Comprueba el campo "status" de la respuesta
+                        // 1) Status OK?
                         if (!"ok".equalsIgnoreCase(resp.getString("status"))) {
                             Toast.makeText(this,
                                     resp.optString("mensaje", "Usuario o contraseña inválidos"),
@@ -99,7 +85,7 @@ public class activity_login extends AppCompatActivity {
                             return;
                         }
 
-                        // 5) Verifica que el usuario esté activo
+                        // 2) Usuario activo?
                         boolean isActive = resp.optBoolean("is_active", true);
                         if (!isActive) {
                             Toast.makeText(this,
@@ -108,40 +94,43 @@ public class activity_login extends AppCompatActivity {
                             return;
                         }
 
-                        // 6) Extrae y almacena el token de autenticación
-                        String token = resp.optString("token", "");
-                        getSharedPreferences("prefs", MODE_PRIVATE)
-                                .edit()
-                                .putString("auth_token", token)
+                        // 3) Extraemos campos
+                        String usuarioResp   = resp.optString("usuario", "");
+                        String nombre        = resp.optString("nombre", "");
+                        String role          = resp.optString("role", "");
+                        String accessToken   = resp.optString("access", "");
+                        String refreshToken  = resp.optString("refresh", "");
+
+                        // 4) Guardamos tokens en SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("APP_LEADS_PREFS", MODE_PRIVATE);
+                        prefs.edit()
+                                .putString("ACCESS_TOKEN", accessToken)
+                                .putString("REFRESH_TOKEN", refreshToken)
                                 .apply();
 
-                        // 7) Crea el objeto User con los datos del JSON
+                        // 5) Creamos el usuario y navegamos según rol
                         User user = new User(
-                                resp.optString("usuario"),
-                                resp.optString("nombre"),
-                                resp.optString("role"),
+                                usuarioResp,
+                                nombre,
+                                role,
                                 isActive,
-                                token
+                                accessToken
                         );
 
-                        // 8) Decide a qué pantalla navegar según el rol
                         Intent intent;
-                        switch (user.getRole().toLowerCase()) {
+                        switch (role.toLowerCase()) {
                             case "admin":
                                 intent = new Intent(this, activity_home_admin.class);
                                 break;
-                            case "Ejecutivo":
+                            case "ejecutivo":
                                 intent = new Intent(this, activity_home_ejecutivo.class);
                                 break;
-                            case "Subgerente":
+                            case "subgerente":
                                 intent = new Intent(this, activity_home_subgerente.class);
                                 break;
                             default:
-                                // Por defecto, vamos a Ejecutivo
                                 intent = new Intent(this, activity_home_ejecutivo.class);
                         }
-
-                        // 9) Pasa el User completo a la siguiente Activity
                         intent.putExtra("user", user);
                         startActivity(intent);
                         finish();
@@ -153,21 +142,16 @@ public class activity_login extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     }
                 },
-                error -> {
-                    // 10) Manejo de errores de la petición (red, servidor, etc.)
-                    Toast.makeText(this,
-                            "Error de conexión: " + error.getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                }
+                error -> Toast.makeText(this,
+                        "Error de conexión: " + error.getMessage(),
+                        Toast.LENGTH_SHORT).show()
         ) {
             @Override
             public String getBodyContentType() {
-                // Indica que enviamos JSON en UTF-8
                 return "application/json; charset=utf-8";
             }
         };
 
-        // 11) Encola la petición para que se ejecute
-        queue.add(req);
+        Volley.newRequestQueue(this).add(req);
     }
 }

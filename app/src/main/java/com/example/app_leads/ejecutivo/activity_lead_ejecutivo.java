@@ -1,4 +1,4 @@
-package com.example.app_leads.admin;
+package com.example.app_leads.ejecutivo;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -30,6 +30,7 @@ import com.example.app_leads.activity_login;
 import com.example.app_leads.api.api_config;
 import com.example.app_leads.model.Lead;
 import com.example.app_leads.model.Lead_adapter;
+import com.example.app_leads.model.User;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,7 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class activity_lead_admin extends AppCompatActivity {
+public class activity_lead_ejecutivo extends AppCompatActivity {
 
     private RecyclerView rvLeads;
     private Lead_adapter adapter;
@@ -53,12 +54,13 @@ public class activity_lead_admin extends AppCompatActivity {
 
     private String selectedDate   = "";
     private String selectedEstado = "Todos";
+    private String currentCrmUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_lead_admin);
+        setContentView(R.layout.activity_lead_ejecutivo);
 
         // Insets full-screen
         ViewCompat.setOnApplyWindowInsetsListener(
@@ -70,6 +72,15 @@ public class activity_lead_admin extends AppCompatActivity {
                 }
         );
 
+        // Recuperar usuario logeado
+        User user = (User) getIntent().getSerializableExtra("user");
+        if (user == null) {
+            startActivity(new Intent(this, activity_login.class));
+            finish();
+            return;
+        }
+        currentCrmUser = user.getUsername().toUpperCase();
+
         etFilterDate  = findViewById(R.id.et_filter_date);
         spinnerEstado = findViewById(R.id.spinner_estado);
         progressBar   = findViewById(R.id.progressBar);
@@ -78,8 +89,7 @@ public class activity_lead_admin extends AppCompatActivity {
 
         rvLeads = findViewById(R.id.rv_leads);
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
-
-        // ← aquí pasamos el layout de admin
+        // <- Aquí pasamos también el layout de ítem para ejecutivo/admin
         adapter = new Lead_adapter(listaLeads, R.layout.item_lead);
         rvLeads.setAdapter(adapter);
 
@@ -104,7 +114,8 @@ public class activity_lead_admin extends AppCompatActivity {
     private void applyFilters() {
         listaLeads.clear();
         for (Lead lead : allLeads) {
-            boolean matchDate   = selectedDate.isEmpty() || selectedDate.equals(lead.getFechaRegistro());
+            boolean matchDate   = selectedDate.isEmpty()
+                    || selectedDate.equals(lead.getFechaRegistro());
             boolean matchEstado = selectedEstado.equals("Todos")
                     || selectedEstado.equalsIgnoreCase(lead.getEstado());
             if (matchDate && matchEstado) {
@@ -138,9 +149,7 @@ public class activity_lead_admin extends AppCompatActivity {
         String token = prefs.getString("ACCESS_TOKEN", null);
         if (token == null || token.isEmpty()) {
             progressBar.setVisibility(View.GONE);
-            Toast.makeText(this,
-                    "Token no encontrado, por favor inicia sesión de nuevo",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Sesión expirada, inicia sesión de nuevo", Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, activity_login.class));
             finish();
             return;
@@ -155,7 +164,7 @@ public class activity_lead_admin extends AppCompatActivity {
                     try {
                         if (!"ok".equalsIgnoreCase(resp.getString("status"))) {
                             Toast.makeText(this,
-                                    resp.optString("mensaje","Error al obtener leads"),
+                                    resp.optString("mensaje", "Error al obtener leads"),
                                     Toast.LENGTH_SHORT).show();
                             return;
                         }
@@ -165,17 +174,21 @@ public class activity_lead_admin extends AppCompatActivity {
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject L = arr.getJSONObject(i);
 
-                            String id               = L.optString("id", "");
-                            String rawFecha         = L.optString("fecha", "");
-                            String ruc              = L.optString("ruc", "");
-                            String empresa          = L.optString("empresa", "");
-                            String ejecutivoCrm     = L.optString("ejecutivo_crm", "");
-                            String subgerenteCrm    = L.optString("subgerente_crm", "");
-                            String ejecutivoName    = L.optString("ejecutivo", "");
-                            String subgerenteName   = L.optString("subgerente", "");
-                            String estado           = L.optString("estado", "");
-                            String situacion        = L.optString("situacion", "");
-                            String detalle          = L.optString("detalle", null);
+                            // Filtrar por ejecutivo_crm
+                            String crm = L.optString("ejecutivo_crm", "").toUpperCase();
+                            if (!crm.equals(currentCrmUser)) continue;
+
+                            String id              = L.optString("id", "");
+                            String rawFecha        = L.optString("fecha", "");
+                            String ruc             = L.optString("ruc", "");
+                            String empresa         = L.optString("empresa", "");
+                            String ejecutivoCrm    = L.optString("ejecutivo_crm", "");
+                            String subgerenteCrm   = L.optString("subgerente_crm", "");
+                            String ejecutivoName   = L.optString("ejecutivo", "");
+                            String subgerenteName  = L.optString("subgerente", "");
+                            String estado          = L.optString("estado", "");
+                            String situacion       = L.optString("situacion", "");
+                            String detalle         = L.optString("detalle", null);
 
                             allLeads.add(new Lead(
                                     id,

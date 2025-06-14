@@ -7,4 +7,6 @@
     <string name="btn_iniciar_sesion">Iniciar sesión</string>
     <string name="btn_ver_leads">Ver leads</string>
     <string name="btn_cerrar_sesion">Cerrar sesión</string>
+    <string name="prompt_filtrar_estado">Filtrar por estado</string>
+    <string name="prompt_filtrar_ejecutivo">Filtrar por ejecutivo</string>
 </resources>

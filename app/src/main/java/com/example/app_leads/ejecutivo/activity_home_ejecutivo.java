@@ -53,7 +53,7 @@ public class activity_home_ejecutivo extends AppCompatActivity {
 
         // Acción del botón Ver Leads
         btnVerLeads.setOnClickListener(v -> {
-            Intent i = new Intent(this, activity_lead_admin.class);
+            Intent i = new Intent(this, activity_lead_ejecutivo.class);
             i.putExtra("user", user);
             startActivity(i);
         });
