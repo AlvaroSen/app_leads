@@ -45,14 +45,14 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
 
     private RecyclerView rvLeads;
     private Lead_adapter adapter;
-    private List<Lead>   allLeads   = new ArrayList<>();
-    private List<Lead>   listaLeads = new ArrayList<>();
+    private List<Lead> allLeads = new ArrayList<>();
+    private List<Lead> listaLeads = new ArrayList<>();
 
-    private EditText    etFilterDate;
-    private Spinner     spinnerEstado;
+    private EditText etFilterDate;
+    private Spinner spinnerEstado;
     private ProgressBar progressBar;
 
-    private String selectedDate   = "";
+    private String selectedDate = "";
     private String selectedEstado = "Todos";
     private String currentCrmUser;
 
@@ -62,7 +62,6 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lead_ejecutivo);
 
-        // Insets full-screen
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main_leads),
                 (v, insets) -> {
@@ -72,7 +71,6 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
                 }
         );
 
-        // Recuperar usuario logeado
         User user = (User) getIntent().getSerializableExtra("user");
         if (user == null) {
             startActivity(new Intent(this, activity_login.class));
@@ -81,15 +79,14 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
         }
         currentCrmUser = user.getUsername().toUpperCase();
 
-        etFilterDate  = findViewById(R.id.et_filter_date);
+        etFilterDate = findViewById(R.id.et_filter_date);
         spinnerEstado = findViewById(R.id.spinner_estado);
-        progressBar   = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
         etFilterDate.setOnClickListener(v -> showDatePicker());
 
         rvLeads = findViewById(R.id.rv_leads);
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
-        // <- Aquí pasamos también el layout de ítem para ejecutivo/admin
         adapter = new Lead_adapter(listaLeads, R.layout.item_lead);
         rvLeads.setAdapter(adapter);
 
@@ -114,7 +111,7 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
     private void applyFilters() {
         listaLeads.clear();
         for (Lead lead : allLeads) {
-            boolean matchDate   = selectedDate.isEmpty()
+            boolean matchDate = selectedDate.isEmpty()
                     || selectedDate.equals(lead.getFechaRegistro());
             boolean matchEstado = selectedEstado.equals("Todos")
                     || selectedEstado.equalsIgnoreCase(lead.getEstado());
@@ -134,11 +131,14 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEstado.setAdapter(spinnerAdapter);
         spinnerEstado.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long id) {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long id) {
                 selectedEstado = estados.get(pos);
                 applyFilters();
             }
-            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
     }
 
@@ -174,21 +174,21 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject L = arr.getJSONObject(i);
 
-                            // Filtrar por ejecutivo_crm
                             String crm = L.optString("ejecutivo_crm", "").toUpperCase();
                             if (!crm.equals(currentCrmUser)) continue;
 
-                            String id              = L.optString("id", "");
-                            String rawFecha        = L.optString("fecha", "");
-                            String ruc             = L.optString("ruc", "");
-                            String empresa         = L.optString("empresa", "");
-                            String ejecutivoCrm    = L.optString("ejecutivo_crm", "");
-                            String subgerenteCrm   = L.optString("subgerente_crm", "");
-                            String ejecutivoName   = L.optString("ejecutivo", "");
-                            String subgerenteName  = L.optString("subgerente", "");
-                            String estado          = L.optString("estado", "");
-                            String situacion       = L.optString("situacion", "");
-                            String detalle         = L.optString("detalle", null);
+                            String id = L.optString("id", "");
+                            String rawFecha = L.optString("fecha", "");
+                            String ruc = L.optString("ruc", "");
+                            String empresa = L.optString("empresa", "");
+                            String ejecutivoCrm = L.optString("ejecutivo_crm", "");
+                            String subgerenteCrm = L.optString("subgerente_crm", "");
+                            String ejecutivoName = L.optString("ejecutivo", "");
+                            String subgerenteName = L.optString("subgerente", "");
+                            String estado = L.optString("estado", "");
+                            String situacion = L.optString("situacion", "");
+                            String detalle = L.optString("detalle", null);
+                            String idContacto = L.optString("id_contacto", "");
 
                             allLeads.add(new Lead(
                                     id,
@@ -201,11 +201,12 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
                                     subgerenteName,
                                     estado,
                                     situacion,
-                                    detalle
+                                    detalle,
+                                    idContacto
                             ));
                         }
 
-                        selectedDate   = "";
+                        selectedDate = "";
                         selectedEstado = "Todos";
                         listaLeads.clear();
                         listaLeads.addAll(allLeads);
@@ -240,8 +241,9 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
                 }
         ) {
-            @Override public Map<String,String> getHeaders() throws AuthFailureError {
-                Map<String,String> h = new HashMap<>();
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> h = new HashMap<>();
                 h.put("Content-Type", "application/json; charset=utf-8");
                 h.put("Authorization", "Bearer " + token);
                 return h;

@@ -14,6 +14,7 @@ public class Lead implements Serializable {
     private String estado;
     private String situacion;
     private String detalle;           // puede ser null
+    private String idContacto;        // NUEVO campo
 
     public Lead(
             String id,
@@ -26,7 +27,8 @@ public class Lead implements Serializable {
             String subgerenteName,
             String estado,
             String situacion,
-            String detalle
+            String detalle,
+            String idContacto      // NUEVO parámetro
     ) {
         this.id              = id;
         this.rawFecha        = rawFecha;
@@ -39,10 +41,13 @@ public class Lead implements Serializable {
         this.estado          = estado;
         this.situacion       = situacion;
         this.detalle         = detalle;
+        this.idContacto      = idContacto;
     }
 
+    // Getters
     public String getId()                 { return id; }
     public String getRawFecha()           { return rawFecha; }
+
     /** Formatea yyyy-MM-dd extraído de la ISO */
     public String getFechaRegistro() {
         return rawFecha.contains("T")
@@ -58,4 +63,14 @@ public class Lead implements Serializable {
     public String getEstado()             { return estado; }
     public String getSituacion()          { return situacion; }
     public String getDetalle()            { return detalle; }
+    public String getIdContacto()         { return idContacto; }
+
+    // Setters necesarios para actualizar campos dinámicamente
+    public void setEjecutivoCrm(String ejecutivoCrm) {
+        this.ejecutivoCrm = ejecutivoCrm;
+    }
+
+    public void setIdContacto(String idContacto) {
+        this.idContacto = idContacto;
+    }
 }

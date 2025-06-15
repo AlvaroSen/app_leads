@@ -33,7 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="8dp"/>
 
-    <!-- Botón Ver Leads con esquinas ligeramente redondeadas -->
+    <!-- Botón Ver Leads -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_ver_leads"
         android:layout_width="0dp"
@@ -49,6 +49,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Botón Asignar Atención -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_asignar_atencion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Asignar atención"
+        android:textColor="@color/on_button_orange"
+        app:backgroundTint="@color/button_orange"
+        app:cornerRadius="12dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_ver_leads"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Botón Cerrar sesión -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"
         android:layout_width="0dp"
@@ -60,8 +77,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btn_ver_leads"
+        app:layout_constraintTop_toBottomOf="@id/btn_asignar_atencion"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

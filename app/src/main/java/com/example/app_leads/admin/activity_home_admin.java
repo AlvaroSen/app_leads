@@ -37,10 +37,11 @@ public class activity_home_admin extends AppCompatActivity {
         User user = (User) getIntent().getSerializableExtra("user");
 
         // Referencias UI
-        TextView tvWelcome    = findViewById(R.id.tv_welcome);
-        TextView tvRole       = findViewById(R.id.tv_role);
+        TextView tvWelcome         = findViewById(R.id.tv_welcome);
+        TextView tvRole            = findViewById(R.id.tv_role);
         MaterialButton btnVerLeads = findViewById(R.id.btn_ver_leads);
-        MaterialButton btnLogout   = findViewById(R.id.btn_logout);
+        MaterialButton btnAsignarAtencion = findViewById(R.id.btn_asignar_atencion);
+        MaterialButton btnLogout         = findViewById(R.id.btn_logout);
 
         // Mostrar nombre y rol
         if (user != null) {
@@ -55,15 +56,20 @@ public class activity_home_admin extends AppCompatActivity {
             startActivity(i);
         });
 
+        // Navegar a la pantalla de asignar atención
+        btnAsignarAtencion.setOnClickListener(v -> {
+            Intent i = new Intent(this, activity_asignar_atencion.class);
+            i.putExtra("user", user);
+            startActivity(i);
+        });
+
         // Cerrar sesión
         btnLogout.setOnClickListener(v -> {
-            // Borrar token de SharedPreferences
             getSharedPreferences("prefs", MODE_PRIVATE)
                     .edit()
                     .remove("auth_token")
                     .apply();
 
-            // Volver al login y limpiar la pila
             Intent i = new Intent(this, activity_login.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);

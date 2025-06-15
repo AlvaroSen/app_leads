@@ -14,17 +14,31 @@ import com.example.app_leads.R;
 import java.util.List;
 
 public class Lead_adapter extends RecyclerView.Adapter<Lead_adapter.VH> {
+    /**
+     * Listener para clic en un lead
+     */
+    public interface OnLeadClickListener {
+        void onLeadClick(Lead lead);
+    }
+
     private final List<Lead> lista;
     private final @LayoutRes int layoutRes;
+    private final OnLeadClickListener listener;
 
     /**
-     * @param lista     lista de Lead a mostrar
-     * @param layoutRes R.layout.item_lead                 —para admin/ejecutivo
-     *                  R.layout.item_lead_subgerente     —para subgerente
+     * Constructor sin listener (para uso genérico)
      */
     public Lead_adapter(List<Lead> lista, @LayoutRes int layoutRes) {
+        this(lista, layoutRes, null);
+    }
+
+    /**
+     * Constructor con listener para clics
+     */
+    public Lead_adapter(List<Lead> lista, @LayoutRes int layoutRes, OnLeadClickListener listener) {
         this.lista     = lista;
         this.layoutRes = layoutRes;
+        this.listener  = listener;
     }
 
     @Override
@@ -60,6 +74,13 @@ public class Lead_adapter extends RecyclerView.Adapter<Lead_adapter.VH> {
 
         // 5) Fecha
         holder.tvFechaRegistro.setText(lead.getFechaRegistro());
+
+        // 6) Click
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onLeadClick(lead);
+            }
+        });
     }
 
     @Override

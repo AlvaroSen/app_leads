@@ -46,16 +46,16 @@ public class activity_lead_subgerente extends AppCompatActivity {
 
     private RecyclerView rvLeads;
     private Lead_adapter adapter;
-    private List<Lead>   allLeads   = new ArrayList<>();
-    private List<Lead>   listaLeads = new ArrayList<>();
+    private List<Lead> allLeads = new ArrayList<>();
+    private List<Lead> listaLeads = new ArrayList<>();
 
-    private EditText    etFilterDate;
-    private Spinner     spinnerEstado;
-    private Spinner     spinnerEjecutivo;
+    private EditText etFilterDate;
+    private Spinner spinnerEstado;
+    private Spinner spinnerEjecutivo;
     private ProgressBar progressBar;
 
-    private String selectedDate      = "";
-    private String selectedEstado    = "Todos";
+    private String selectedDate = "";
+    private String selectedEstado = "Todos";
     private String selectedEjecutivo = "Todos";
     private String currentCrmSubger;
 
@@ -65,17 +65,12 @@ public class activity_lead_subgerente extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lead_subgerente);
 
-        // Insets full-screen
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main_leads),
-                (v, insets) -> {
-                    Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
-                    return insets;
-                }
-        );
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_leads), (v, insets) -> {
+            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
+            return insets;
+        });
 
-        // Recuperar usuario
         User user = (User) getIntent().getSerializableExtra("user");
         if (user == null) {
             startActivity(new Intent(this, activity_login.class));
@@ -84,18 +79,16 @@ public class activity_lead_subgerente extends AppCompatActivity {
         }
         currentCrmSubger = user.getUsername().toUpperCase();
 
-        // UI references
-        etFilterDate     = findViewById(R.id.et_filter_date);
-        spinnerEstado    = findViewById(R.id.spinner_estado);
+        etFilterDate = findViewById(R.id.et_filter_date);
+        spinnerEstado = findViewById(R.id.spinner_estado);
         spinnerEjecutivo = findViewById(R.id.spinner_ejecutivo);
-        progressBar      = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
         etFilterDate.setOnClickListener(v -> showDatePicker());
 
-        // RecyclerView + adapter
         rvLeads = findViewById(R.id.rv_leads);
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new Lead_adapter(listaLeads, R.layout.item_lead_subgerente);
+        adapter = new Lead_adapter(listaLeads, R.layout.item_lead);
         rvLeads.setAdapter(adapter);
 
         fetchLeads();
@@ -119,12 +112,9 @@ public class activity_lead_subgerente extends AppCompatActivity {
     private void applyFilters() {
         listaLeads.clear();
         for (Lead lead : allLeads) {
-            boolean matchDate      = selectedDate.isEmpty()
-                    || selectedDate.equals(lead.getFechaRegistro());
-            boolean matchEstado    = selectedEstado.equals("Todos")
-                    || selectedEstado.equalsIgnoreCase(lead.getEstado());
-            boolean matchEjecutivo = selectedEjecutivo.equals("Todos")
-                    || selectedEjecutivo.equalsIgnoreCase(lead.getEjecutivoName());
+            boolean matchDate = selectedDate.isEmpty() || selectedDate.equals(lead.getFechaRegistro());
+            boolean matchEstado = selectedEstado.equals("Todos") || selectedEstado.equalsIgnoreCase(lead.getEstado());
+            boolean matchEjecutivo = selectedEjecutivo.equals("Todos") || selectedEjecutivo.equalsIgnoreCase(lead.getEjecutivoName());
             if (matchDate && matchEstado && matchEjecutivo) {
                 listaLeads.add(lead);
             }
@@ -133,9 +123,7 @@ public class activity_lead_subgerente extends AppCompatActivity {
     }
 
     private void setupEstadoSpinner(List<String> estados) {
-        ArrayAdapter<String> ad = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, estados
-        );
+        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, estados);
         ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEstado.setAdapter(ad);
         spinnerEstado.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -148,9 +136,7 @@ public class activity_lead_subgerente extends AppCompatActivity {
     }
 
     private void setupEjecutivoSpinner(List<String> items) {
-        ArrayAdapter<String> ad = new ArrayAdapter<>(
-                this, android.R.layout.simple_spinner_item, items
-        );
+        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
         ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEjecutivo.setAdapter(ad);
         spinnerEjecutivo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -183,7 +169,7 @@ public class activity_lead_subgerente extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     try {
                         if (!"ok".equalsIgnoreCase(resp.getString("status"))) {
-                            Toast.makeText(this, resp.optString("mensaje","Error al obtener leads"), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, resp.optString("mensaje", "Error al obtener leads"), Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -191,40 +177,38 @@ public class activity_lead_subgerente extends AppCompatActivity {
                         JSONArray arr = resp.getJSONArray("data");
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject L = arr.getJSONObject(i);
-                            String crmSub = L.optString("subgerente_crm","").toUpperCase();
+                            String crmSub = L.optString("subgerente_crm", "").toUpperCase();
                             if (!crmSub.equals(currentCrmSubger)) continue;
 
-                            // parse campos
-                            String id             = L.optString("id","");
-                            String rawFecha       = L.optString("fecha","");
-                            String ruc            = L.optString("ruc","");
-                            String empresa        = L.optString("empresa","");
-                            String ejecutivoCrm   = L.optString("ejecutivo_crm","");
-                            String subgerenteCrm  = L.optString("subgerente_crm","");
-                            String ejecutivoName  = L.optString("ejecutivo","");
-                            String subgerenteName = L.optString("subgerente","");
-                            String estado         = L.optString("estado","");
-                            String situacion      = L.optString("situacion","");
-                            String detalle        = L.optString("detalle", null);
+                            String id = L.optString("id", "");
+                            String rawFecha = L.optString("fecha", "");
+                            String ruc = L.optString("ruc", "");
+                            String empresa = L.optString("empresa", "");
+                            String ejecutivoCrm = L.optString("ejecutivo_crm", "");
+                            String subgerenteCrm = L.optString("subgerente_crm", "");
+                            String ejecutivoName = L.optString("ejecutivo", "");
+                            String subgerenteName = L.optString("subgerente", "");
+                            String estado = L.optString("estado", "");
+                            String situacion = L.optString("situacion", "");
+                            String detalle = L.optString("detalle", null);
+                            String idContacto = L.optString("id_contacto", "");
 
                             allLeads.add(new Lead(
                                     id, rawFecha, ruc, empresa,
                                     ejecutivoCrm, subgerenteCrm,
                                     ejecutivoName, subgerenteName,
-                                    estado, situacion, detalle
+                                    estado, situacion, detalle, idContacto
                             ));
                         }
 
-                        // reset filtros
-                        selectedDate      = "";
-                        selectedEstado    = "Todos";
+                        selectedDate = "";
+                        selectedEstado = "Todos";
                         selectedEjecutivo = "Todos";
                         listaLeads.clear();
                         listaLeads.addAll(allLeads);
                         adapter.notifyDataSetChanged();
 
-                        // poblar spinners
-                        List<String> estados    = new ArrayList<>();
+                        List<String> estados = new ArrayList<>();
                         List<String> ejecutivos = new ArrayList<>();
                         estados.add("Todos");
                         ejecutivos.add("Todos");
@@ -232,7 +216,7 @@ public class activity_lead_subgerente extends AppCompatActivity {
                             String es = l.getEstado();
                             if (!estados.contains(es)) estados.add(es);
                             String ej = l.getEjecutivoName();
-                            if (ej!=null && !ej.isEmpty() && !ejecutivos.contains(ej)) {
+                            if (ej != null && !ej.isEmpty() && !ejecutivos.contains(ej)) {
                                 ejecutivos.add(ej);
                             }
                         }
@@ -241,26 +225,26 @@ public class activity_lead_subgerente extends AppCompatActivity {
                         setupEjecutivoSpinner(ejecutivos);
 
                     } catch (Exception e) {
-                        Log.e("fetchLeads","JSON parse error",e);
-                        Toast.makeText(this,"JSON parse error: "+e.getMessage(),Toast.LENGTH_LONG).show();
+                        Log.e("fetchLeads", "JSON parse error", e);
+                        Toast.makeText(this, "JSON parse error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 },
                 err -> {
                     progressBar.setVisibility(View.GONE);
-                    Log.e("fetchLeads","Volley error",err);
-                    String msg = err.getMessage()!=null
+                    Log.e("fetchLeads", "Volley error", err);
+                    String msg = err.getMessage() != null
                             ? err.getMessage()
-                            : (err.networkResponse!=null
-                            ? "HTTP "+err.networkResponse.statusCode
+                            : (err.networkResponse != null
+                            ? "HTTP " + err.networkResponse.statusCode
                             : "Desconocido");
-                    Toast.makeText(this,"Error de red: "+msg,Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Error de red: " + msg, Toast.LENGTH_LONG).show();
                 }
         ) {
             @Override
-            public Map<String,String> getHeaders() throws AuthFailureError {
-                Map<String,String> h = new HashMap<>();
-                h.put("Content-Type","application/json; charset=utf-8");
-                h.put("Authorization","Bearer "+token);
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> h = new HashMap<>();
+                h.put("Content-Type", "application/json; charset=utf-8");
+                h.put("Authorization", "Bearer " + token);
                 return h;
             }
         };

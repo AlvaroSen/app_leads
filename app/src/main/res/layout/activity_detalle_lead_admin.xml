@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:background="#FFF6F6F6">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+
+        <!-- Título principal -->
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Detalle del Lead"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:paddingBottom="16dp"
+            android:textColor="#000000"/>
+
+        <!-- Empresa -->
+        <TextView
+            android:id="@+id/tv_empresa"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Empresa"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingBottom="4dp"/>
+
+        <!-- RUC -->
+        <TextView
+            android:id="@+id/tv_ruc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="RUC"
+            android:textColor="#666666"
+            android:paddingBottom="16dp"/>
+
+        <!-- Detalles -->
+        <TextView android:id="@+id/tv_id"           style="@style/DetalleItem" android:text="ID:" />
+        <TextView android:id="@+id/tv_fecha"        style="@style/DetalleItem" android:text="Fecha:" />
+        <TextView android:id="@+id/tv_estado"       style="@style/DetalleItem" android:text="Estado:" />
+        <TextView android:id="@+id/tv_situacion"    style="@style/DetalleItem" android:text="Situación:" />
+        <TextView android:id="@+id/tv_detalle"      style="@style/DetalleItem" android:text="Detalle:" />
+        <TextView android:id="@+id/tv_ejecutivo"    style="@style/DetalleItem" android:text="Ejecutivo:" />
+        <TextView android:id="@+id/tv_subgerente"   style="@style/DetalleItem" android:text="Subgerente:" />
+
+        <!-- Separador visual -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCC"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Título de datos de contacto -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Datos del contacto del cliente"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="#000"
+            android:paddingBottom="8dp"/>
+
+        <!-- Datos del contacto -->
+        <TextView android:id="@+id/tv_contacto_nombre"   style="@style/DetalleItem" android:text="Nombre contacto:" />
+        <TextView android:id="@+id/tv_contacto_email"    style="@style/DetalleItem" android:text="Correo contacto:" />
+        <TextView android:id="@+id/tv_contacto_telefono" style="@style/DetalleItem" android:text="Teléfono contacto:" />
+
+    </LinearLayout>
+</ScrollView>

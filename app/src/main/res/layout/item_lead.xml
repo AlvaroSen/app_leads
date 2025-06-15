@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -18,35 +17,50 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textStyle="bold"/>
+            android:text="ID"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_estado"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Estado"
             android:textStyle="italic"
-            android:textColor="#008577"/>
+            android:textColor="#008577" />
     </LinearLayout>
 
-    <!-- Nombre de la empresa -->
+    <!-- Empresa -->
     <TextView
         android:id="@+id/tv_empresa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="4dp"/>
+        android:paddingTop="4dp"
+        android:text="Empresa" />
 
-    <!-- Fecha de registro -->
+    <!-- Ejecutivo (solo visible en subgerente) -->
+    <TextView
+        android:id="@+id/tv_ejecutivo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:text="Ejecutivo"
+        android:textStyle="italic"
+        android:textColor="#444"
+        android:visibility="gone" /> <!-- visible solo si se usa en item_lead_subgerente -->
+
+    <!-- Fecha -->
     <TextView
         android:id="@+id/tv_fecha_registro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="4dp"
-        android:textColor="#666"/>
+        android:textColor="#666"
+        android:text="Fecha" />
 
-    <!-- Separador entre registros -->
+    <!-- Línea separadora -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#DDD"
-        android:layout_marginTop="12dp"/>
+        android:layout_marginTop="12dp"
+        android:background="#DDD" />
 </LinearLayout>

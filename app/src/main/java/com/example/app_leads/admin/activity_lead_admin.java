@@ -44,14 +44,14 @@ public class activity_lead_admin extends AppCompatActivity {
 
     private RecyclerView rvLeads;
     private Lead_adapter adapter;
-    private List<Lead>   allLeads   = new ArrayList<>();
-    private List<Lead>   listaLeads = new ArrayList<>();
+    private List<Lead> allLeads = new ArrayList<>();
+    private List<Lead> listaLeads = new ArrayList<>();
 
-    private EditText    etFilterDate;
-    private Spinner     spinnerEstado;
+    private EditText etFilterDate;
+    private Spinner spinnerEstado;
     private ProgressBar progressBar;
 
-    private String selectedDate   = "";
+    private String selectedDate = "";
     private String selectedEstado = "Todos";
 
     @Override
@@ -60,26 +60,20 @@ public class activity_lead_admin extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lead_admin);
 
-        // Insets full-screen
-        ViewCompat.setOnApplyWindowInsetsListener(
-                findViewById(R.id.main_leads),
-                (v, insets) -> {
-                    Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-                    v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
-                    return insets;
-                }
-        );
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_leads), (v, insets) -> {
+            Insets sys = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(sys.left, sys.top, sys.right, sys.bottom);
+            return insets;
+        });
 
-        etFilterDate  = findViewById(R.id.et_filter_date);
+        etFilterDate = findViewById(R.id.et_filter_date);
         spinnerEstado = findViewById(R.id.spinner_estado);
-        progressBar   = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
         etFilterDate.setOnClickListener(v -> showDatePicker());
 
         rvLeads = findViewById(R.id.rv_leads);
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
-
-        // ← aquí pasamos el layout de admin
         adapter = new Lead_adapter(listaLeads, R.layout.item_lead);
         rvLeads.setAdapter(adapter);
 
@@ -104,9 +98,9 @@ public class activity_lead_admin extends AppCompatActivity {
     private void applyFilters() {
         listaLeads.clear();
         for (Lead lead : allLeads) {
-            boolean matchDate   = selectedDate.isEmpty() || selectedDate.equals(lead.getFechaRegistro());
-            boolean matchEstado = selectedEstado.equals("Todos")
-                    || selectedEstado.equalsIgnoreCase(lead.getEstado());
+            boolean matchDate = selectedDate.isEmpty() || selectedDate.equals(lead.getFechaRegistro());
+            boolean matchEstado = selectedEstado.equals("Todos") ||
+                    selectedEstado.equalsIgnoreCase(lead.getEstado());
             if (matchDate && matchEstado) {
                 listaLeads.add(lead);
             }
@@ -123,11 +117,14 @@ public class activity_lead_admin extends AppCompatActivity {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerEstado.setAdapter(spinnerAdapter);
         spinnerEstado.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long id) {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long id) {
                 selectedEstado = estados.get(pos);
                 applyFilters();
             }
-            @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
         });
     }
 
@@ -138,9 +135,7 @@ public class activity_lead_admin extends AppCompatActivity {
         String token = prefs.getString("ACCESS_TOKEN", null);
         if (token == null || token.isEmpty()) {
             progressBar.setVisibility(View.GONE);
-            Toast.makeText(this,
-                    "Token no encontrado, por favor inicia sesión de nuevo",
-                    Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Token no encontrado, por favor inicia sesión de nuevo", Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, activity_login.class));
             finish();
             return;
@@ -154,9 +149,7 @@ public class activity_lead_admin extends AppCompatActivity {
                     progressBar.setVisibility(View.GONE);
                     try {
                         if (!"ok".equalsIgnoreCase(resp.getString("status"))) {
-                            Toast.makeText(this,
-                                    resp.optString("mensaje","Error al obtener leads"),
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, resp.optString("mensaje", "Error al obtener leads"), Toast.LENGTH_SHORT).show();
                             return;
                         }
 
@@ -165,17 +158,18 @@ public class activity_lead_admin extends AppCompatActivity {
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject L = arr.getJSONObject(i);
 
-                            String id               = L.optString("id", "");
-                            String rawFecha         = L.optString("fecha", "");
-                            String ruc              = L.optString("ruc", "");
-                            String empresa          = L.optString("empresa", "");
-                            String ejecutivoCrm     = L.optString("ejecutivo_crm", "");
-                            String subgerenteCrm    = L.optString("subgerente_crm", "");
-                            String ejecutivoName    = L.optString("ejecutivo", "");
-                            String subgerenteName   = L.optString("subgerente", "");
-                            String estado           = L.optString("estado", "");
-                            String situacion        = L.optString("situacion", "");
-                            String detalle          = L.optString("detalle", null);
+                            String id             = L.optString("id", "");
+                            String rawFecha       = L.optString("fecha", "");
+                            String ruc            = L.optString("ruc", "");
+                            String empresa        = L.optString("empresa", "");
+                            String ejecutivoCrm   = L.optString("ejecutivo_crm", "");
+                            String subgerenteCrm  = L.optString("subgerente_crm", "");
+                            String ejecutivoName  = L.optString("ejecutivo", "");
+                            String subgerenteName = L.optString("subgerente", "");
+                            String estado         = L.optString("estado", "");
+                            String situacion      = L.optString("situacion", "");
+                            String detalle        = L.optString("detalle", null);
+                            String idContacto     = L.optString("id_contacto", ""); // Nuevo campo
 
                             allLeads.add(new Lead(
                                     id,
@@ -188,11 +182,12 @@ public class activity_lead_admin extends AppCompatActivity {
                                     subgerenteName,
                                     estado,
                                     situacion,
-                                    detalle
+                                    detalle,
+                                    idContacto
                             ));
                         }
 
-                        selectedDate   = "";
+                        selectedDate = "";
                         selectedEstado = "Todos";
                         listaLeads.clear();
                         listaLeads.addAll(allLeads);
@@ -209,9 +204,7 @@ public class activity_lead_admin extends AppCompatActivity {
 
                     } catch (Exception e) {
                         Log.e("fetchLeads", "JSON parse error", e);
-                        Toast.makeText(this,
-                                "JSON parse error: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "JSON parse error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 },
                 err -> {
@@ -222,13 +215,12 @@ public class activity_lead_admin extends AppCompatActivity {
                             : (err.networkResponse != null
                             ? "HTTP " + err.networkResponse.statusCode
                             : "Desconocido");
-                    Toast.makeText(this,
-                            "Error de red: " + msg,
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Error de red: " + msg, Toast.LENGTH_LONG).show();
                 }
         ) {
-            @Override public Map<String,String> getHeaders() throws AuthFailureError {
-                Map<String,String> h = new HashMap<>();
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> h = new HashMap<>();
                 h.put("Content-Type", "application/json; charset=utf-8");
                 h.put("Authorization", "Bearer " + token);
                 return h;
