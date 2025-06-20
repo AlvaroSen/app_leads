@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tv_stat_fecha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Fecha"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_stat_ejecutivo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ejecutivo"/>
+
+    <TextView
+        android:id="@+id/tv_stat_subgerente"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Subgerente"/>
+
+    <ProgressBar
+        android:id="@+id/bar_stat"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="16dp"
+        android:progress="0"
+        android:max="100"
+        android:layout_marginVertical="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_stat_resumen"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pendientes: 0 / Atendidos: 0 / Total: 0"/>
+</LinearLayout>

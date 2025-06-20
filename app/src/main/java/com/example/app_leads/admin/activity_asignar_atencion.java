@@ -39,11 +39,11 @@ import java.util.Map;
 
 public class activity_asignar_atencion extends AppCompatActivity {
 
-    private EditText       etBuscarIdLead;
-    private RecyclerView   rvLeads;
-    private Lead_adapter   adapter;
-    private List<Lead>     allLeads      = new ArrayList<>();
-    private List<Lead>     filteredLeads = new ArrayList<>();
+    private EditText     etBuscarIdLead;
+    private RecyclerView rvLeads;
+    private Lead_adapter adapter;
+    private List<Lead>   allLeads      = new ArrayList<>();
+    private List<Lead>   filteredLeads = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public class activity_asignar_atencion extends AppCompatActivity {
         etBuscarIdLead = findViewById(R.id.et_buscar_id_lead);
         rvLeads        = findViewById(R.id.rv_leads);
 
-        // 1) Configura RecyclerView con adapter que maneja clics
+        // Configura RecyclerView
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
         adapter = new Lead_adapter(
                 filteredLeads,
@@ -62,7 +62,7 @@ public class activity_asignar_atencion extends AppCompatActivity {
         );
         rvLeads.setAdapter(adapter);
 
-        // 2) Filtrado en tiempo real al escribir
+        // Filtrado en tiempo real
         etBuscarIdLead.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -71,7 +71,7 @@ public class activity_asignar_atencion extends AppCompatActivity {
             @Override public void afterTextChanged(Editable s) {}
         });
 
-        // 3) Carga inicial de datos
+        // Carga inicial
         cargarLeads();
     }
 
@@ -85,9 +85,11 @@ public class activity_asignar_atencion extends AppCompatActivity {
             return;
         }
 
+        String url = api_config.LEADS_REGISTROS;  // ← aquí se usa la nueva constante
+
         JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.GET,
-                api_config.OBTENER_LEADS,
+                url,
                 null,
                 resp -> {
                     try {
@@ -113,11 +115,10 @@ public class activity_asignar_atencion extends AppCompatActivity {
                                     L.optString("subgerente", ""),
                                     L.optString("estado", ""),
                                     L.optString("situacion", ""),
-                                    L.optString("detalle", null),
+                                    L.optString("detalle_lead", ""),
                                     L.optString("id_contacto", "")
                             ));
                         }
-                        // Actualiza la vista con el filtro actual
                         filtrarLeads(etBuscarIdLead.getText().toString());
                     } catch (Exception e) {
                         Log.e("cargarLeads", "JSON parse error", e);
@@ -132,8 +133,8 @@ public class activity_asignar_atencion extends AppCompatActivity {
             @Override
             public Map<String,String> getHeaders() throws AuthFailureError {
                 Map<String,String> h = new HashMap<>();
-                h.put("Content-Type", "application/json; charset=utf-8");
-                h.put("Authorization", "Bearer " + token);
+                h.put("Content-Type","application/json; charset=utf-8");
+                h.put("Authorization","Bearer " + token);
                 return h;
             }
         };
@@ -152,32 +153,36 @@ public class activity_asignar_atencion extends AppCompatActivity {
     }
 
     private void onLeadSelected(Lead lead) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this)
-                .setTitle("Asignar Ejecutivo CRM");
-
-        EditText input = (EditText) LayoutInflater
-                .from(this)
-                .inflate(R.layout.dialog_input_text, null);
-        input.setHint("Nuevo nombre de ejecutivo");
-        builder.setView(input);
-
-        builder.setPositiveButton("Guardar", (DialogInterface d, int w) -> {
-                    String nuevo = input.getText().toString().trim();
-                    if (nuevo.isEmpty()) {
-                        Toast.makeText(this, "Debe ingresar un nombre", Toast.LENGTH_SHORT).show();
-                    } else {
-                        actualizarEjecutivo(lead, nuevo);
-                    }
-                })
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Asignar Ejecutivo CRM")
+                .setView(LayoutInflater.from(this)
+                        .inflate(R.layout.dialog_input_text, null))
+                .setPositiveButton("Guardar", null)
                 .setNegativeButton("Cancelar", null)
-                .show();
+                .create();
+
+        dialog.setOnShowListener(d -> {
+            EditText input = dialog.findViewById(R.id.et_dialog_input);
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(v -> {
+                        String nuevo = input.getText().toString().trim();
+                        if (nuevo.isEmpty()) {
+                            Toast.makeText(this, "Debe ingresar un nombre", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dialog.dismiss();
+                            actualizarEjecutivo(lead, nuevo);
+                        }
+                    });
+        });
+
+        dialog.show();
     }
 
     private void actualizarEjecutivo(Lead lead, String nuevo) {
         try {
             String idEnc = URLEncoder.encode(lead.getId(), StandardCharsets.UTF_8.name());
-            // Construye: https://.../api/leads/{ID}/asignar-ejecutivo/
-            String url = api_config.ASIGNAR_EJECUTIVO + "/" + idEnc + "/asignar-ejecutivo/";
+            String url   = String.format(api_config.ASIGNAR_EJECUTIVO, idEnc);
+
             JSONObject body = new JSONObject();
             body.put("ejecutivo_crm", nuevo);
 
@@ -191,7 +196,9 @@ public class activity_asignar_atencion extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                             Toast.makeText(this, "Ejecutivo asignado", Toast.LENGTH_SHORT).show();
                         } else {
-                            Toast.makeText(this, "Error: " + resp.optString("mensaje"), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this,
+                                    "Error: " + resp.optString("mensaje"),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     },
                     (VolleyError err) -> {
@@ -204,13 +211,14 @@ public class activity_asignar_atencion extends AppCompatActivity {
                     String token = getSharedPreferences("APP_LEADS_PREFS", MODE_PRIVATE)
                             .getString("ACCESS_TOKEN", "");
                     Map<String,String> h = new HashMap<>();
-                    h.put("Content-Type", "application/json; charset=utf-8");
-                    h.put("Authorization", "Bearer " + token);
+                    h.put("Content-Type","application/json; charset=utf-8");
+                    h.put("Authorization","Bearer " + token);
                     return h;
                 }
             };
 
             Volley.newRequestQueue(this).add(req);
+
         } catch (Exception e) {
             Log.e("actualizarEjecutivo", e.toString());
             Toast.makeText(this, "Error al armar petición", Toast.LENGTH_SHORT).show();

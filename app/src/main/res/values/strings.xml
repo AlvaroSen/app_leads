@@ -5,8 +5,9 @@
     <string name="hint_usuario">Ingresa tu usuario</string>
     <string name="hint_contrasena">Ingresa tu contraseña</string>
     <string name="btn_iniciar_sesion">Iniciar sesión</string>
-    <string name="btn_ver_leads">Ver atenciones</string>
+    <string name="btn_ver_leads">Atenciones pendientes</string>
     <string name="btn_cerrar_sesion">Cerrar sesión</string>
     <string name="prompt_filtrar_estado">Filtrar por estado</string>
+    <string name="prompt_filtrar_situacion">Filtrar por situación</string>
     <string name="prompt_filtrar_ejecutivo">Filtrar por ejecutivo</string>
 </resources>

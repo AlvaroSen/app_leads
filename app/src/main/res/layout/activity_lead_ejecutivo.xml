@@ -11,10 +11,11 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lista de Leads"
+        android:text="Leads Pendientes"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:paddingBottom="16dp"/>
 
     <!-- Filtro por fecha -->
     <EditText
@@ -25,28 +26,28 @@
         android:focusable="false"
         android:clickable="true"
         android:drawableEnd="@android:drawable/ic_menu_my_calendar"
-        android:background="@null"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp" />
+        android:padding="12dp"
+        android:background="@drawable/border_background"/>
 
-    <!-- Filtro por estado -->
-    <Spinner
-        android:id="@+id/spinner_estado"
+    <!-- Buscador por ID_LEAD -->
+    <EditText
+        android:id="@+id/et_search_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:prompt="@string/prompt_filtrar_estado"
-        android:background="@null"
+        android:hint="Buscar por ID de Lead"
+        android:inputType="text"
+        android:padding="12dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
+        android:background="@drawable/border_background"/>
 
     <!-- Separador -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#DDD"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginVertical="8dp"/>
 
-    <!-- Contenedor de lista y ProgressBar -->
+    <!-- RecyclerView + ProgressBar -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -55,7 +56,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_leads"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:paddingBottom="16dp"/>
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -63,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone" />
+            android:visibility="gone"/>
     </FrameLayout>
 
 </LinearLayout>

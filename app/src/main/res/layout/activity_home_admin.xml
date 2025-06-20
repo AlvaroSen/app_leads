@@ -65,6 +65,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Botón Ver Estadísticas -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_estadisticas"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Ver estadísticas"
+        android:textColor="@color/on_button_orange"
+        app:backgroundTint="@color/button_orange"
+        app:cornerRadius="12dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btn_asignar_atencion"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <!-- Botón Cerrar sesión -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_logout"
@@ -77,7 +93,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/btn_asignar_atencion"
+        app:layout_constraintTop_toBottomOf="@id/btn_estadisticas"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

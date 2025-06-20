@@ -15,6 +15,15 @@
         android:theme="@style/Theme.App_leads"
         tools:targetApi="31">
         <activity
+            android:name=".admin.activity_estadisticas_admin"
+            android:exported="false" />
+        <activity
+            android:name=".ejecutivo.activity_detalle_lead_ejecutivo"
+            android:exported="false" />
+        <activity
+            android:name=".ejecutivo.activity_lead_historial_ejecutivo"
+            android:exported="false" />
+        <activity
             android:name=".admin.activity_asignar_atencion"
             android:exported="false" />
         <activity

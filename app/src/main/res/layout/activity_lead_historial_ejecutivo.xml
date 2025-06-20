@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main_leads"
+    android:id="@+id/main_historial"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,7 +12,7 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Lista de Leads"
+        android:text="Historial de Leads"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="#000"
@@ -31,24 +31,14 @@
         android:background="@drawable/border_background"
         android:padding="12dp" />
 
-    <!-- NUEVO: Filtro por ID de lead -->
-    <EditText
-        android:id="@+id/et_search_id"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Buscar por ID de Lead"
-        android:inputType="text"
-        android:background="@drawable/border_background"
-        android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp" />
-
     <!-- Filtro por estado -->
     <Spinner
         android:id="@+id/spinner_estado"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:prompt="@string/prompt_filtrar_estado"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:background="@drawable/border_background"
         android:padding="12dp" />
 
@@ -57,7 +47,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#DDD"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
 
     <!-- Contenedor de lista -->
@@ -74,7 +63,7 @@
             android:clipToPadding="false"
             android:paddingBottom="16dp" />
 
-        <!-- Indicador de carga -->
+        <!-- ProgressBar -->
         <ProgressBar
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleLarge"
@@ -82,7 +71,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone" />
-
     </FrameLayout>
 
 </LinearLayout>

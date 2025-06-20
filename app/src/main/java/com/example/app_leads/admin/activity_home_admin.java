@@ -23,7 +23,6 @@ public class activity_home_admin extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home_admin);
 
-        // Insets para pantalla completa
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main_admin),
                 (v, insets) -> {
@@ -33,37 +32,38 @@ public class activity_home_admin extends AppCompatActivity {
                 }
         );
 
-        // Recuperar el objeto User
         User user = (User) getIntent().getSerializableExtra("user");
 
-        // Referencias UI
         TextView tvWelcome         = findViewById(R.id.tv_welcome);
         TextView tvRole            = findViewById(R.id.tv_role);
         MaterialButton btnVerLeads = findViewById(R.id.btn_ver_leads);
         MaterialButton btnAsignarAtencion = findViewById(R.id.btn_asignar_atencion);
-        MaterialButton btnLogout         = findViewById(R.id.btn_logout);
+        MaterialButton btnEstadisticas = findViewById(R.id.btn_estadisticas);
+        MaterialButton btnLogout   = findViewById(R.id.btn_logout);
 
-        // Mostrar nombre y rol
         if (user != null) {
             tvWelcome.setText("Bienvenido " + user.getFullName());
-            tvRole   .setText("Rol: " + user.getRole());
+            tvRole.setText("Rol: " + user.getRole());
         }
 
-        // Navegar a la pantalla de leads
         btnVerLeads.setOnClickListener(v -> {
             Intent i = new Intent(this, activity_lead_admin.class);
             i.putExtra("user", user);
             startActivity(i);
         });
 
-        // Navegar a la pantalla de asignar atención
         btnAsignarAtencion.setOnClickListener(v -> {
             Intent i = new Intent(this, activity_asignar_atencion.class);
             i.putExtra("user", user);
             startActivity(i);
         });
 
-        // Cerrar sesión
+        btnEstadisticas.setOnClickListener(v -> {
+            Intent i = new Intent(this, activity_estadisticas_admin.class);
+            i.putExtra("user", user);
+            startActivity(i);
+        });
+
         btnLogout.setOnClickListener(v -> {
             getSharedPreferences("prefs", MODE_PRIVATE)
                     .edit()

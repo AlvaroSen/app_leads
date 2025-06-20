@@ -4,13 +4,13 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -42,18 +42,19 @@ import java.util.List;
 import java.util.Map;
 
 public class activity_lead_ejecutivo extends AppCompatActivity {
+    private static final String TAG = "LeadEjecutivo";
+    private static final int    REQ_UPDATE    = 200;
 
     private RecyclerView rvLeads;
     private Lead_adapter adapter;
-    private List<Lead> allLeads = new ArrayList<>();
-    private List<Lead> listaLeads = new ArrayList<>();
+    private List<Lead>   allLeads   = new ArrayList<>();
+    private List<Lead>   listaLeads = new ArrayList<>();
 
-    private EditText etFilterDate;
-    private Spinner spinnerEstado;
+    private EditText    etFilterDate;
+    private EditText    etSearchId;
     private ProgressBar progressBar;
 
-    private String selectedDate = "";
-    private String selectedEstado = "Todos";
+    private String selectedDate   = "";
     private String currentCrmUser;
 
     @Override
@@ -62,6 +63,7 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_lead_ejecutivo);
 
+        // edge-to-edge padding
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main_leads),
                 (v, insets) -> {
@@ -71,34 +73,60 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
                 }
         );
 
+        // UI refs
+        etFilterDate = findViewById(R.id.et_filter_date);
+        etSearchId   = findViewById(R.id.et_search_id);
+        progressBar  = findViewById(R.id.progressBar);
+        rvLeads      = findViewById(R.id.rv_leads);
+
+        // Usuario actual
         User user = (User) getIntent().getSerializableExtra("user");
         if (user == null) {
+            Toast.makeText(this, "Sesión inválida", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, activity_login.class));
             finish();
             return;
         }
         currentCrmUser = user.getUsername().toUpperCase();
 
-        etFilterDate = findViewById(R.id.et_filter_date);
-        spinnerEstado = findViewById(R.id.spinner_estado);
-        progressBar = findViewById(R.id.progressBar);
-
+        // Date picker
         etFilterDate.setOnClickListener(v -> showDatePicker());
 
-        rvLeads = findViewById(R.id.rv_leads);
+        // Buscador ID
+        etSearchId.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s,int st,int b,int c){}
+            @Override public void onTextChanged(CharSequence s,int st,int b,int c){
+                applyFilters();
+            }
+            @Override public void afterTextChanged(Editable s){}
+        });
+
+        // RecyclerView + adapter
         rvLeads.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new Lead_adapter(listaLeads, R.layout.item_lead);
+        adapter = new Lead_adapter(listaLeads, R.layout.item_lead, lead -> {
+            Intent i = new Intent(this, activity_detalle_lead_ejecutivo.class);
+            i.putExtra("lead", lead);
+            startActivityForResult(i, REQ_UPDATE);
+        });
         rvLeads.setAdapter(adapter);
 
         fetchLeads();
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req == REQ_UPDATE && res == RESULT_OK) {
+            fetchLeads();
+        }
     }
 
     private void showDatePicker() {
         Calendar c = Calendar.getInstance();
         new DatePickerDialog(
                 this,
-                (DatePicker dp, int year, int month, int day) -> {
-                    selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day);
+                (DatePicker dp, int y, int m, int d) -> {
+                    selectedDate = String.format("%04d-%02d-%02d", y, m+1, d);
                     etFilterDate.setText(selectedDate);
                     applyFilters();
                 },
@@ -109,47 +137,30 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
     }
 
     private void applyFilters() {
+        String qDate = selectedDate;
+        String qId   = etSearchId.getText().toString().trim().toLowerCase();
+
         listaLeads.clear();
         for (Lead lead : allLeads) {
-            boolean matchDate = selectedDate.isEmpty()
-                    || selectedDate.equals(lead.getFechaRegistro());
-            boolean matchEstado = selectedEstado.equals("Todos")
-                    || selectedEstado.equalsIgnoreCase(lead.getEstado());
-            if (matchDate && matchEstado) {
+            boolean byDate = qDate.isEmpty() || qDate.equals(lead.getFechaRegistro());
+            boolean byCrm  = lead.getEjecutivoCrm().toUpperCase().equals(currentCrmUser);
+            boolean byPend = "Pendiente".equalsIgnoreCase(lead.getEstado());
+            boolean byId   = qId.isEmpty() || lead.getId().toLowerCase().contains(qId);
+
+            if (byDate && byCrm && byPend && byId) {
                 listaLeads.add(lead);
             }
         }
         adapter.notifyDataSetChanged();
     }
 
-    private void setupEstadoSpinner(List<String> estados) {
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_item,
-                estados
-        );
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerEstado.setAdapter(spinnerAdapter);
-        spinnerEstado.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int pos, long id) {
-                selectedEstado = estados.get(pos);
-                applyFilters();
-            }
-
-            @Override
-            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
-        });
-    }
-
     private void fetchLeads() {
         progressBar.setVisibility(View.VISIBLE);
-
         SharedPreferences prefs = getSharedPreferences("APP_LEADS_PREFS", MODE_PRIVATE);
-        String token = prefs.getString("ACCESS_TOKEN", null);
-        if (token == null || token.isEmpty()) {
+        String token = prefs.getString("ACCESS_TOKEN", "");
+        if (token.isEmpty()) {
             progressBar.setVisibility(View.GONE);
-            Toast.makeText(this, "Sesión expirada, inicia sesión de nuevo", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Token expirado", Toast.LENGTH_LONG).show();
             startActivity(new Intent(this, activity_login.class));
             finish();
             return;
@@ -157,95 +168,55 @@ public class activity_lead_ejecutivo extends AppCompatActivity {
 
         JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.GET,
-                api_config.OBTENER_LEADS,
+                api_config.LEADS_REGISTROS,
                 null,
                 resp -> {
                     progressBar.setVisibility(View.GONE);
                     try {
                         if (!"ok".equalsIgnoreCase(resp.getString("status"))) {
-                            Toast.makeText(this,
-                                    resp.optString("mensaje", "Error al obtener leads"),
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, resp.optString("mensaje"), Toast.LENGTH_SHORT).show();
                             return;
                         }
-
                         allLeads.clear();
                         JSONArray arr = resp.getJSONArray("data");
                         for (int i = 0; i < arr.length(); i++) {
                             JSONObject L = arr.getJSONObject(i);
-
-                            String crm = L.optString("ejecutivo_crm", "").toUpperCase();
-                            if (!crm.equals(currentCrmUser)) continue;
-
-                            String id = L.optString("id", "");
-                            String rawFecha = L.optString("fecha", "");
-                            String ruc = L.optString("ruc", "");
-                            String empresa = L.optString("empresa", "");
-                            String ejecutivoCrm = L.optString("ejecutivo_crm", "");
-                            String subgerenteCrm = L.optString("subgerente_crm", "");
-                            String ejecutivoName = L.optString("ejecutivo", "");
-                            String subgerenteName = L.optString("subgerente", "");
-                            String estado = L.optString("estado", "");
-                            String situacion = L.optString("situacion", "");
-                            String detalle = L.optString("detalle", null);
-                            String idContacto = L.optString("id_contacto", "");
-
                             allLeads.add(new Lead(
-                                    id,
-                                    rawFecha,
-                                    ruc,
-                                    empresa,
-                                    ejecutivoCrm,
-                                    subgerenteCrm,
-                                    ejecutivoName,
-                                    subgerenteName,
-                                    estado,
-                                    situacion,
-                                    detalle,
-                                    idContacto
+                                    L.optString("id",""),
+                                    L.optString("fecha",""),
+                                    L.optString("ruc",""),
+                                    L.optString("empresa",""),
+                                    L.optString("ejecutivo_crm",""),
+                                    L.optString("subgerente_crm",""),
+                                    L.optString("ejecutivo",""),
+                                    L.optString("subgerente",""),
+                                    L.optString("estado",""),
+                                    L.optString("situacion",""),
+                                    L.optString("detalle_lead",""),
+                                    L.optString("id_contacto","")
                             ));
                         }
-
+                        // aplicar filtro inicial
                         selectedDate = "";
-                        selectedEstado = "Todos";
-                        listaLeads.clear();
-                        listaLeads.addAll(allLeads);
-                        adapter.notifyDataSetChanged();
-
-                        List<String> estados = new ArrayList<>();
-                        estados.add("Todos");
-                        for (Lead l : allLeads) {
-                            if (!estados.contains(l.getEstado())) {
-                                estados.add(l.getEstado());
-                            }
-                        }
-                        setupEstadoSpinner(estados);
+                        etFilterDate.setText("");
+                        etSearchId.setText("");
+                        applyFilters();
 
                     } catch (Exception e) {
-                        Log.e("fetchLeads", "JSON parse error", e);
-                        Toast.makeText(this,
-                                "JSON parse error: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
+                        Log.e(TAG, "JSON parse error", e);
+                        Toast.makeText(this, "Error al procesar datos", Toast.LENGTH_LONG).show();
                     }
                 },
                 err -> {
                     progressBar.setVisibility(View.GONE);
-                    Log.e("fetchLeads", "Volley error", err);
-                    String msg = err.getMessage() != null
-                            ? err.getMessage()
-                            : (err.networkResponse != null
-                            ? "HTTP " + err.networkResponse.statusCode
-                            : "Desconocido");
-                    Toast.makeText(this,
-                            "Error de red: " + msg,
-                            Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "Volley error", err);
+                    Toast.makeText(this, "Error de red", Toast.LENGTH_LONG).show();
                 }
         ) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> h = new HashMap<>();
-                h.put("Content-Type", "application/json; charset=utf-8");
-                h.put("Authorization", "Bearer " + token);
+            @Override public Map<String,String> getHeaders() throws AuthFailureError {
+                Map<String,String> h = new HashMap<>();
+                h.put("Authorization","Bearer "+token);
+                h.put("Content-Type","application/json");
                 return h;
             }
         };

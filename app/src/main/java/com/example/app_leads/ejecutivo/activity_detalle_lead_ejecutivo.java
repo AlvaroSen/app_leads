@@ -1,4 +1,4 @@
-package com.example.app_leads.admin;
+package com.example.app_leads.ejecutivo;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,8 +20,6 @@ import androidx.core.view.WindowInsetsCompat;
 import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.app_leads.R;
@@ -38,11 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class activity_detalle_lead_admin extends AppCompatActivity {
+public class activity_detalle_lead_ejecutivo extends AppCompatActivity {
 
-    private static final String TAG = "DetalleLeadAdmin";
+    private static final String TAG = "DetalleLeadEje";
 
-    private TextView tvEmpresa, tvRuc, tvId, tvFecha, tvEjecutivo, tvSubgerente;
+    private TextView tvEmpresa, tvRuc, tvId, tvFecha, tvSubgerente;
     private TextView tvContactoNombre, tvContactoEmail, tvContactoTelefono;
     private Spinner   spEstado, spSituacion;
     private EditText  etDetalle;
@@ -53,7 +51,7 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_detalle_lead_admin);
+        setContentView(R.layout.activity_detalle_lead_ejecutivo);
 
         ViewCompat.setOnApplyWindowInsetsListener(
                 findViewById(R.id.main),
@@ -68,7 +66,6 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
         tvRuc              = findViewById(R.id.tv_ruc);
         tvId               = findViewById(R.id.tv_id);
         tvFecha            = findViewById(R.id.tv_fecha);
-        tvEjecutivo        = findViewById(R.id.tv_ejecutivo);
         tvSubgerente       = findViewById(R.id.tv_subgerente);
         tvContactoNombre   = findViewById(R.id.tv_contacto_nombre);
         tvContactoEmail    = findViewById(R.id.tv_contacto_email);
@@ -94,7 +91,6 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
         tvRuc.setText("RUC: " + lead.getRuc());
         tvId.setText("ID: " + lead.getId());
         tvFecha.setText("Fecha: " + lead.getFechaRegistro());
-        tvEjecutivo.setText("Ejecutivo: " + lead.getEjecutivoName());
         tvSubgerente.setText("Subgerente: " + lead.getSubgerenteName());
         etDetalle.setText(lead.getDetalle() == null ? "" : lead.getDetalle());
 
@@ -132,11 +128,10 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
                 }
         ) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                String token = prefs.getString("ACCESS_TOKEN", "");
-                Map<String, String> h = new HashMap<>();
-                h.put("Authorization", "Bearer " + token);
-                h.put("Content-Type", "application/json");
+            public Map<String,String> getHeaders() throws AuthFailureError {
+                Map<String,String> h = new HashMap<>();
+                h.put("Authorization","Bearer " + prefs.getString("ACCESS_TOKEN",""));
+                h.put("Content-Type","application/json");
                 return h;
             }
         };
@@ -174,9 +169,8 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
         ) {
             @Override
             public Map<String,String> getHeaders() throws AuthFailureError {
-                String token = prefs.getString("ACCESS_TOKEN", "");
                 Map<String,String> h = new HashMap<>();
-                h.put("Authorization", "Bearer " + token);
+                h.put("Authorization","Bearer " + prefs.getString("ACCESS_TOKEN",""));
                 h.put("Content-Type","application/json");
                 return h;
             }
@@ -191,13 +185,11 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
             String url   = api_config.BASE_URL + "contactos/" + idEnc + "/";
 
             SharedPreferences prefs = getSharedPreferences("APP_LEADS_PREFS", MODE_PRIVATE);
-            String token = prefs.getString("ACCESS_TOKEN","");
 
             JsonObjectRequest req = new JsonObjectRequest(
                     Request.Method.GET, url, null,
                     response -> {
                         try {
-                            if (!"ok".equalsIgnoreCase(response.getString("status"))) return;
                             JSONArray arr = response.getJSONArray("data");
                             if (arr.length()>0) {
                                 JSONObject o = arr.getJSONObject(0);
@@ -226,14 +218,14 @@ public class activity_detalle_lead_admin extends AppCompatActivity {
             Volley.newRequestQueue(this).add(req);
 
         } catch (Exception e) {
-            Log.e(TAG, "Error codificando contacto", e);
+            Log.e(TAG, "Error encoding contacto", e);
         }
     }
 
     private void enviarActualizacion() {
         try {
             String idEnc = URLEncoder.encode(lead.getId(), StandardCharsets.UTF_8.name());
-            String url   = String.format(api_config.ACTUALIZAR_LEAD, idEnc);
+            String url   = api_config.ACTUALIZAR_LEAD.replace("%s", idEnc);
 
             JSONObject body = new JSONObject();
             body.put("estado",    spEstado.getSelectedItem().toString());
