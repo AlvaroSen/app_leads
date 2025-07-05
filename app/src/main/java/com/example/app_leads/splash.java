@@ -23,6 +23,10 @@ public class splash extends AppCompatActivity {
         MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.intro_sound);
         mediaPlayer.start();
 
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
